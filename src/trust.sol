@@ -1,6 +1,8 @@
 //SPDX-License-Identifier:MIT
 pragma solidity ^0.8.18;
-import "@OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/ReentrancyGuard.sol";
+
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract Trust {
     address public admin_owner;
@@ -21,6 +23,11 @@ contract Trust {
     );
 
     event releaseMerchantFunds(address indexed merchant, uint amount);
+    event refundCustomerFunds(
+        address indexed merchant,
+        address indexed customer,
+        uint amount
+    );
 
     // function to make payment by taking in the merchant's address, price of product and product ID
     function makePayment(
@@ -40,8 +47,17 @@ contract Trust {
         emit paymentRecieved(msg.sender, _merchant, priceofStock, _product);
     }
 
+    //function to get price
+    function getPrice() public view returns (int) {
+        AggregatorV3Interface getPriceData = AggregatorV3Interface(
+            0x001382149eBa3441043c1c66972b4772963f5D43
+        );
+        (, int answer, , , ) = getPriceData.latestRoundData();
+        return answer;
+    }
+
     //Merchant withdraw
-    function merchantWithdraw() external {
+    function merchantWithdraw() external nonReentrant {
         //check if merchant balance is less zero
         require(merchantBalance[msg.sender] > 0, "zero balance do not apply");
 
@@ -59,7 +75,25 @@ contract Trust {
         emit releaseMerchantFunds(msg.sender, amount);
     }
 
-    //allow access to admin only on calls
+    //Refund customers
+    function refundCustomer(
+        address _customerAddress,
+        address _merchantAddress,
+        uint amount
+    ) public onlyOwner {
+        require(
+            merchantBalance[_merchantAddress] >= amount,
+            "Insufficient merchant balance"
+        );
+
+        merchantBalance[_merchantAddress] -= amount;
+        (bool success, ) = payable(_customerAddress).call{value: amount}("");
+        require(success, "transfer failed");
+
+        emit refundCustomerFunds(_merchantAddress, _customerAddress, amount);
+    }
+
+    // modifiers
     modifier onlyOwner() {
         require(msg.sender == admin_owner);
         _;
