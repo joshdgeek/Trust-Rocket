@@ -27,28 +27,39 @@ contract TrustTest is Test {
         assertEq(trust.admin_owner(), admin, "not admin");
     }
 
+    function tokenUSD(uint256 val) public pure returns (uint256) {
+        uint256 usdt = 1700 * val;
+        return usdt;
+    }
+
+    function testCryptoToFiatConversion() public pure {
+        uint256 cryptoValue = 4;
+        uint256 fiatCorrespondingValue = tokenUSD(cryptoValue);
+        assertEq(fiatCorrespondingValue, 6800, "incorrect conversion");
+    }
+
     function testIncorrectPayment() public {
-        vm.expectRevert();
-        uint amount = 0.5 ether;
+        vm.expectRevert("incorrect amount");
+        uint256 amount = 0.5 ether;
         vm.deal(customer, 1 ether);
         vm.prank(customer);
         trust.makePayment{value: 0.2 ether}(merchant, amount, "steam");
     }
 
     function testMerchantAccountUpdate() public {
-        uint initialBalance = trust.merchantBalance(merchant);
-        uint amount = 1 ether; //price of product
+        uint256 initialBalance = trust.merchantBalance(merchant);
+        uint256 amount = 1 ether; //price of product
         vm.deal(customer, 2 ether); //fund customeracount with 2 eth
         vm.prank(customer); // set customer account to make payment
 
         trust.makePayment{value: amount}(merchant, amount, "Steam");
 
-        uint newBalance = trust.merchantBalance(merchant);
+        uint256 newBalance = trust.merchantBalance(merchant);
         assertEq(newBalance, initialBalance + amount);
     }
 
     function testMerchantWithdrawal() public {
-        uint amount = 1 ether;
+        uint256 amount = 1 ether;
 
         //fund customers wallet
         vm.deal(customer, amount);
@@ -72,7 +83,7 @@ contract TrustTest is Test {
     }
 
     function testRefund() public {
-        uint amount = 0.2 ether;
+        uint256 amount = 0.2 ether;
         vm.deal(customer, 1 ether);
         vm.prank(customer);
         trust.makePayment{value: amount}(merchant, amount, "steam");
