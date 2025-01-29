@@ -31,8 +31,13 @@ contract Trust is ReentrancyGuard {
         whenNotPaused
     {
         ///@notice run validation for incomming arguents
-        require(_merchant != address(0), "Invalid merchant address");
+        // one to check for zero address
+        // the other to prevent merchant trading with themselves to boost trading stats.
+        require(_merchant != address(0) && _merchant != msg.sender, "Invalid merchant address");
+
+        //validation to ensure product must not be an empty string
         require(bytes(_product).length > 0, "cannot process payment for empty product");
+
         require(msg.value == priceofStock, "incorrect amount");
 
         uint256 actualFee = (feesInPercentage * msg.value) / 1000;
