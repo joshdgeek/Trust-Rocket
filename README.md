@@ -1,66 +1,35 @@
-## Foundry
+# Trust-Rocket Smart Contract 🛡️  
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**Trust-Rocket** is a Solidity smart contract designed to facilitate secure and efficient payments between buyers and merchants. It incorporates platform fee management, merchant fund withdrawal, customer refunds, and contract pausing mechanisms. Built using Solidity `0.8.18`, it leverages Foundry for testing and deployment.
 
-Foundry consists of:
+---
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Features  
 
-## Documentation
+- **Payment Processing**: Handles payments from buyers to merchants with a small platform fee.  
+- **Merchant Fund Withdrawal**: Merchants can securely withdraw their earnings.  
+- **Customer Refunds**: Admins can issue refunds from the merchant's balance.  
+- **Platform Fee Management**: Admin can withdraw accumulated platform fees.  
+- **Pause Functionality**: The admin can pause contract operations for security or maintenance.  
+- **Security**: Implements OpenZeppelin's `ReentrancyGuard` to prevent reentrancy attacks.  
 
-https://book.getfoundry.sh/
+---
 
-## Usage
+## Prerequisites  
 
-### Build
+Before deploying or testing the contract, ensure you have the following:  
 
-```shell
-$ forge build
-```
+- **Foundry Framework**: Installed via [`foundryup`].
+- **Solidity Compiler**: Foundry automatically handles this.  
+- **Ethereum Wallet**: For testing on testnets (e.g., MetaMask).  
 
-### Test
+---
 
-```shell
-$ forge test
-```
+## Getting Started  
 
-### Format
+Clone the repository and set up the project:  
 
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+```bash  
+git clone <repository-url>  
+cd trust-smart-contract  
+forge install  
