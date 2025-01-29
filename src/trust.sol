@@ -19,32 +19,20 @@ contract Trust is ReentrancyGuard {
     }
 
     //EVENTS to log payment confirmations
-    event paymentRecieved(
-        address indexed buyer,
-        address indexed merchant,
-        uint256 amount,
-        string product_ID
-    );
+    event paymentRecieved(address indexed buyer, address indexed merchant, uint256 amount, string product_ID);
 
     event releaseMerchantFunds(address indexed merchant, uint256 amount);
-    event refundCustomerFunds(
-        address indexed merchant,
-        address indexed customer,
-        uint256 amount
-    );
+    event refundCustomerFunds(address indexed merchant, address indexed customer, uint256 amount);
 
     /// @notice  function to make payment by taking in the merchant's address, price of product and product ID
-    function makePayment(
-        address _merchant,
-        uint256 priceofStock,
-        string memory _product
-    ) public payable whenNotPaused {
+    function makePayment(address _merchant, uint256 priceofStock, string memory _product)
+        public
+        payable
+        whenNotPaused
+    {
         ///@notice run validation for incomming arguents
         require(_merchant != address(0), "Invalid merchant address");
-        require(
-            bytes(_product).length > 0,
-            "cannot process payment for empty product"
-        );
+        require(bytes(_product).length > 0, "cannot process payment for empty product");
         require(msg.value == priceofStock, "incorrect amount");
 
         uint256 actualFee = (feesInPercentage * msg.value) / 1000;
@@ -67,7 +55,7 @@ contract Trust is ReentrancyGuard {
 
         //send transaction to merchant wallet
         ///@notice the same mapping was called by on-purpose
-        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        (bool success,) = payable(msg.sender).call{value: amount}("");
         require(success, "transfer failed");
 
         //RESET merchant balance
@@ -78,19 +66,12 @@ contract Trust is ReentrancyGuard {
     }
 
     //Refund customers
-    function refundCustomer(
-        address _customerAddress,
-        address _merchantAddress,
-        uint256 amount
-    ) public onlyOwner {
-        require(
-            merchantBalance[_merchantAddress] >= amount,
-            "Insufficient merchant balance"
-        );
+    function refundCustomer(address _customerAddress, address _merchantAddress, uint256 amount) public onlyOwner {
+        require(merchantBalance[_merchantAddress] >= amount, "Insufficient merchant balance");
 
         merchantBalance[_merchantAddress] -= amount;
 
-        (bool success, ) = payable(_customerAddress).call{value: amount}("");
+        (bool success,) = payable(_customerAddress).call{value: amount}("");
         require(success, "transfer failed");
 
         emit refundCustomerFunds(_merchantAddress, _customerAddress, amount);
@@ -105,7 +86,7 @@ contract Trust is ReentrancyGuard {
         require(platformFee > 0, "No fees available");
         uint256 amount = platformFee;
         platformFee = 0;
-        (bool success, ) = payable(admin_owner).call{value: amount}("");
+        (bool success,) = payable(admin_owner).call{value: amount}("");
         require(success, "Withdrawal failed");
     }
 
